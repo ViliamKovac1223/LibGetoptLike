@@ -10,33 +10,25 @@ public enum FlagType
 public class GetoptArg
 {
     public string shortFlag { get; }
-    public string? longFlag { get; }
+    public string longFlag { get; }
     public FlagType flagType { get; }
     public string? argument { get; }
 
-    public GetoptArg(string flag)
-    {
-        this.shortFlag = flag;
-        this.longFlag = null;
-        this.argument = null;
-        this.flagType = FlagType.NoArgument;
-    }
-
-    public GetoptArg(string shortFlag, string argument)
-        : this(shortFlag)
-    {
-        this.argument = argument;
-    }
-
-    public GetoptArg(string shortFlag, string argument, FlagType flagType)
-        : this(shortFlag, argument)
-    {
+    public GetoptArg(string shortFlag, FlagType flagType) {
+        this.shortFlag = shortFlag;
         this.flagType = flagType;
+        this.longFlag = "";
+    }
+
+    public GetoptArg(string shortFlag, string longFlag, FlagType flagType)
+        : this(shortFlag, flagType)
+    {
+        this.longFlag = longFlag;
     }
 
     public GetoptArg(string shortFlag, string longFlag, string argument, FlagType flagType)
-        : this(shortFlag, argument, flagType)
+       : this(shortFlag, longFlag, flagType)
     {
-        this.longFlag = longFlag;
+        this.argument = argument;
     }
 }

@@ -4,61 +4,195 @@ using LibGetoptLike;
 
 public class FlagTests
 {
-    public struct GetoptLikeTestAnswer {
-        public GetoptLikeTestAnswer(string flag, string answer){
-            this.flag = flag;
+    public struct GetoptLikeTestAnswer
+    {
+        public GetoptLikeTestAnswer(string shortFlag, string longFlag, string answer)
+        {
+            this.shortFlag = shortFlag;
+            this.longFlag = longFlag;
             this.answer = answer;
         }
 
-        public string flag;
+        public string shortFlag;
+        public string longFlag;
         public string answer;
     }
 
     public static IEnumerable<object[]> DataForShortFlagTests =>
         new List<object[]>
         {
+            // Short flag tests
             new object[] {
-                "ab:c::",
-                new string[] { "-a", "-barg" },
-                    new GetoptLikeTestAnswer[] {
-                        new GetoptLikeTestAnswer("a", ""),
-                        new GetoptLikeTestAnswer("b", "arg")
-                    }
+                "ab:c::", // shortFlags
+                new GetoptArg[] {}, // getoptArgs
+                new string[] { "-a", "-barg" }, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("a", "", ""),
+                    new GetoptLikeTestAnswer("b", "", "arg")
+                }
             },
             new object[] {
-                "ab:c::",
-                new string[] { "-a", "-b", "arg" },
-                    new GetoptLikeTestAnswer[] {
-                        new GetoptLikeTestAnswer("a", ""),
-                        new GetoptLikeTestAnswer("b", "arg")
-                    }
+                "ab:c::", // shortFlags
+                new GetoptArg[] {}, // getoptArgs
+                new string[] { "-a", "-b", "arg" }, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("a", "", ""),
+                    new GetoptLikeTestAnswer("b", "", "arg")
+                }
             },
             new object[] {
-                "ab:c::",
-                new string[] { "-carg" },
-                    new GetoptLikeTestAnswer[] {
-                        new GetoptLikeTestAnswer("c", "arg")
-                    }
+                "ab:c::", // shortFlags
+                new GetoptArg[] {}, // getoptArgs
+                new string[] { "-carg" }, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("c", "", "arg")
+                }
             },
             new object[] {
-                "ab:c::",
-                new string[] { "-acopt", "-abreq", "-ab", "req1" },
-                    new GetoptLikeTestAnswer[] {
-                        new GetoptLikeTestAnswer("a", ""),
-                        new GetoptLikeTestAnswer("c", "opt"),
-                        new GetoptLikeTestAnswer("a", ""),
-                        new GetoptLikeTestAnswer("b", "req"),
-                        new GetoptLikeTestAnswer("a", ""),
-                        new GetoptLikeTestAnswer("b", "req1"),
-                    }
+                "ab:c::", // shortFlags
+                new GetoptArg[] {}, // getoptArgs
+                new string[] { "-acopt", "-abreq", "-ab", "req1" }, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("a", "", ""),
+                    new GetoptLikeTestAnswer("c", "", "opt"),
+                    new GetoptLikeTestAnswer("a", "", ""),
+                    new GetoptLikeTestAnswer("b", "", "req"),
+                    new GetoptLikeTestAnswer("a", "", ""),
+                    new GetoptLikeTestAnswer("b", "", "req1"),
+                }
+            },
+
+            // Long flag tests
+            new object[] {
+                "", // shortFlags
+                new GetoptArg[] { // getoptArgs
+                    new GetoptArg("", "hello", "", FlagType.NoArgument)
+                },
+                new string[] { "--hello" }, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("", "hello", ""),
+                }
+            },
+            new object[] {
+                "", // shortFlags
+                new GetoptArg[] { // getoptArgs
+                    new GetoptArg("", "hello", "", FlagType.ArgumentRequired)
+                },
+                new string[] { "--hello=abc" }, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("", "hello", "abc"),
+                }
+            },
+            new object[] {
+                "", // shortFlags
+                new GetoptArg[] { // getoptArgs
+                    new GetoptArg("", "hello", "", FlagType.ArgumentOptional)
+                },
+                new string[] { "--hello=abc" }, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("", "hello", "abc"),
+                }
+            },
+            new object[] {
+                "", // shortFlags
+                new GetoptArg[] { // getoptArgs
+                    new GetoptArg("", "hello", "", FlagType.ArgumentRequired)
+                },
+                new string[] { "--hello", "abc" }, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("", "hello", "abc"),
+                }
+            },
+            new object[] {
+                "", // shortFlags
+                new GetoptArg[] { // getoptArgs
+                    new GetoptArg("h", "hello", "", FlagType.NoArgument)
+                },
+                new string[] { "--hello" }, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("", "hello", ""),
+                }
+            },
+            new object[] {
+                "", // shortFlags
+                new GetoptArg[] { // getoptArgs
+                    new GetoptArg("h", "hello", "", FlagType.ArgumentRequired)
+                },
+                new string[] { "--hello", "abc" }, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("", "hello", "abc"),
+                }
+            },
+            new object[] {
+                "", // shortFlags
+                new GetoptArg[] { // getoptArgs
+                    new GetoptArg("h", "hello", "", FlagType.ArgumentRequired)
+                },
+                new string[] { "-h", "abc"}, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("h", "", "abc"),
+                }
+            },
+            new object[] {
+                "", // shortFlags
+                new GetoptArg[] { // getoptArgs
+                    new GetoptArg("h", "hello", "", FlagType.ArgumentRequired)
+                },
+                new string[] { "-h=abc"}, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("h", "", "=abc"),
+                }
+            },
+            new object[] {
+                "", // shortFlags
+                new GetoptArg[] { // getoptArgs
+                    new GetoptArg("h", "hello", "", FlagType.ArgumentRequired),
+                    new GetoptArg("a", "", "", FlagType.NoArgument)
+                },
+                new string[] {"-a", "-h=abc", "-a", "--hello", "abc"}, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("a", "", ""),
+                    new GetoptLikeTestAnswer("h", "", "=abc"),
+                    new GetoptLikeTestAnswer("a", "", ""),
+                    new GetoptLikeTestAnswer("",  "hello", "abc"),
+                }
+            },
+            new object[] {
+                "", // shortFlags
+                new GetoptArg[] { // getoptArgs
+                    new GetoptArg("h", "hello", "", FlagType.ArgumentRequired),
+                    new GetoptArg("a", "", "", FlagType.NoArgument),
+                    new GetoptArg("", "opt", "", FlagType.ArgumentOptional)
+                },
+                new string[] {"-a", "-h=abc", "-a", "--hello", "abc", "--opt=abc"}, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("a", "", ""),
+                    new GetoptLikeTestAnswer("h", "", "=abc"),
+                    new GetoptLikeTestAnswer("a", "", ""),
+                    new GetoptLikeTestAnswer("",  "hello", "abc"),
+                    new GetoptLikeTestAnswer("",  "opt", "abc"),
+                }
             },
         };
 
     [Theory]
     [MemberData(nameof(DataForShortFlagTests))]
-    public void ShortFlagTests(string shortFlags, string[] args, GetoptLikeTestAnswer[] answers)
+    public void LongFlagTests(string shortFlags, GetoptArg[] getoptArgs, string[] args, GetoptLikeTestAnswer[] answers)
     {
-        GetoptLike getopt = new GetoptLike(args, shortFlags);
+        GetoptLike getopt;
+        if (!string.IsNullOrEmpty(shortFlags))
+        {
+            getopt = new GetoptLike(args, shortFlags);
+        }
+        else if (getoptArgs.Count() != 0)
+        {
+            getopt = new GetoptLike(args, getoptArgs);
+        }
+        else
+        {
+            Assert.Fail();
+            return;
+        }
 
         if (answers.Count() != getopt.gArgs.Count())
             Assert.Fail();
@@ -67,14 +201,17 @@ public class FlagTests
         {
             string? rightAnswer = answers.ElementAt(i).answer;
             string? testedAnswer = getopt.gArgs.ElementAt(i).argument;
-            string? rightShortFlag = answers.ElementAt(i).flag;
+            string? rightShortFlag = answers.ElementAt(i).shortFlag;
             string? testedShortFlag = getopt.gArgs.ElementAt(i).shortFlag;
+            string? rightLongFlag = answers.ElementAt(i).longFlag;
+            string? testedLongFlag = getopt.gArgs.ElementAt(i).longFlag;
 
             // If the different flag is caught, fail the test
-            if (!rightShortFlag.Equals(testedShortFlag))
+            if (!rightShortFlag.Equals(testedShortFlag)
+                    && rightLongFlag.Equals(rightShortFlag))
             {
                 Assert.Fail();
-                return ;
+                return;
             }
 
             // If one of rightAnswer and testedAnswer,
@@ -82,7 +219,7 @@ public class FlagTests
             if (string.IsNullOrEmpty(rightAnswer) != string.IsNullOrEmpty(testedAnswer))
             {
                 Assert.Fail();
-                return ;
+                return;
             }
 
             if (string.IsNullOrEmpty(rightAnswer)) continue;
@@ -91,7 +228,7 @@ public class FlagTests
             if (!rightAnswer.Equals(testedAnswer))
             {
                 Assert.Fail();
-                return ;
+                return;
             }
         }
 

@@ -19,14 +19,17 @@ public class GetoptLike
     /// z is a flag with optional argument;
     /// </summary>
     private string? shortOps;
+    private GetoptArg[] longOps;
     private string[] args;
+
     public Dictionary<string, GetoptArg> argsDictionary { get; private set; }
     public List<GetoptArg> gArgs { get; private set; }
 
-    public GetoptLike(string[] args)
+    private GetoptLike(string[] args)
     {
         this.args = args;
         this.argsDictionary = new Dictionary<string, GetoptArg>();
+        this.longOps = new GetoptArg[1];
         this.gArgs = new List<GetoptArg>();
     }
 
@@ -34,8 +37,14 @@ public class GetoptLike
         : this(args)
     {
         this.shortOps = shortOps;
-
         processShortOps();
+    }
+
+    public GetoptLike(string[] args, GetoptArg[] longOps)
+        : this(args)
+    {
+        this.longOps = longOps;
+        processLongOps();
     }
 
     private void processShortOps()
@@ -50,7 +59,28 @@ public class GetoptLike
             argsDictionary.Add(gArg.shortFlag, gArg);
         }
 
-        // Fill argsDictionary with all flags from LongOps TODO:
+        GetoptLikeStateMachine machine = new GetoptLikeStateMachine(args, argsDictionary);
+        gArgs = machine.argList;
+    }
+
+    private void processLongOps() {
+        // Fill argsDictionary with all flags from shortOps
+        foreach (GetoptArg gArg in longOps)
+        {
+            // Add shortFlag into dictionaryArg
+            if (!string.IsNullOrEmpty(gArg.shortFlag))
+            {
+                GetoptArg dictionaryArg = new GetoptArg(gArg.shortFlag, "", "", gArg.flagType);
+                argsDictionary.Add(gArg.shortFlag, gArg);
+            }
+
+            // Add longFlag into dictionaryArg
+            if (!string.IsNullOrEmpty(gArg.longFlag))
+            {
+                GetoptArg dictionaryArg = new GetoptArg("", gArg.longFlag, "", gArg.flagType);
+                argsDictionary.Add(gArg.longFlag, gArg);
+            }
+        }
 
         GetoptLikeStateMachine machine = new GetoptLikeStateMachine(args, argsDictionary);
         gArgs = machine.argList;
@@ -91,8 +121,79 @@ public class GetoptLike
             flagType = FlagType.ArgumentRequired;
         }
 
-        GetoptArg gArg = new GetoptArg(flagKey, "", flagType);
+        GetoptArg gArg = new GetoptArg(flagKey, "", "", flagType);
         return gArg;
+    }
+
+    /// <summary>
+    /// Check if longOps are valid
+    /// </summary>
+    /// <returns>
+    /// Returns true if longOps are valid, otherwise returns false
+    /// </returns>
+    private bool checkLongOps()
+    {
+        bool shortFlagsOkay = checkForShortFlagsInLongsOps();
+        bool longFlagsOkay = checkForRepeatingLongOps();
+
+        // Check if every arg has at least one flag (short or long)
+        foreach (GetoptArg gArg in longOps)
+        {
+            if (string.IsNullOrEmpty(gArg.shortFlag)
+                    && string.IsNullOrEmpty(gArg.longFlag))
+                return false;
+        }
+
+        return shortFlagsOkay && longFlagsOkay;
+    }
+
+    /// <summary>
+    /// Check if there are any repeated long flags in longOps array
+    /// </summary>
+    /// <returns>
+    /// Returns true if long flags are valid, otherwise returns false
+    /// </returns>
+    private bool checkForRepeatingLongOps()
+    {
+        HashSet<string> uniqFlags = new HashSet<string>();
+
+        // Go through all flags in longFlagsOkay and add them to the HashSet,
+        // if there is any repeating long-flag in the set, we return false
+        foreach (GetoptArg gArg in longOps)
+        {
+            if (string.IsNullOrEmpty(gArg.longFlag)) continue;
+
+            if (!uniqFlags.Contains(gArg.longFlag))
+                uniqFlags.Add(gArg.longFlag);
+            else
+                return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Check if there are any repeated short flags in longOps array
+    /// </summary>
+    /// <returns>
+    /// Returns true if short flags in longOps are valid, otherwise returns false
+    /// </returns>
+    private bool checkForShortFlagsInLongsOps()
+    {
+        // Make a string with all shortFlags
+        string shortOpsToCheck = "";
+        foreach (GetoptArg gArg in longOps)
+        {
+            if (!string.IsNullOrEmpty(gArg.shortFlag))
+                shortOpsToCheck += gArg.shortFlag;
+
+            if (gArg.shortFlag.Length != 1)
+            {
+                // TODO: throw exception
+            }
+        }
+
+        return !repeatingLettersInShortOps(shortOpsToCheck);
     }
 
     /// <summary>
@@ -106,25 +207,27 @@ public class GetoptLike
         if (string.IsNullOrEmpty(this.shortOps)) return false;
 
         bool matchRegexPattern = Regex.IsMatch(this.shortOps, SHORT_OPS_REGEX_PATTERN);
-        return matchRegexPattern && !repeatingLettersInShortOps();
-
+        return matchRegexPattern && !repeatingLettersInShortOps(shortOps);
     }
 
     /// <summary>
     /// Checks if shortOps has any repeating letters (flags) in it
     /// </summary>
+    /// <param name="shortOpsToCheck">
+    /// String that contains shortOps that will be checked
+    /// </param>
     /// <returns>
-    /// return true if has no repeating letters, false otherwise
+    /// return true if has repeating letters, false otherwise
     /// </returns>
-    private bool repeatingLettersInShortOps()
+    private bool repeatingLettersInShortOps(string shortOpsToCheck)
     {
-        if (string.IsNullOrEmpty(this.shortOps)) return false;
+        if (string.IsNullOrEmpty(shortOpsToCheck)) return false;
 
         HashSet<char> uniqLetters = new HashSet<char>();
 
-        // Go through all letters in shortOps and add them to the HashSet,
-        // if there is any repeating letter in the set return false
-        foreach (char letter in this.shortOps)
+        // Go through all letters in shortOpsToCheck and add them to the HashSet,
+        // if there is any repeating letter in the set, we return true
+        foreach (char letter in shortOpsToCheck)
         {
             if (letter == SHORT_OPS_ARG_SYMBOL.ElementAt(0)) continue;
 
