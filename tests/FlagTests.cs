@@ -328,6 +328,28 @@ public class FlagTests
         Assert.True(true);
     }
 
+    [Fact]
+    public void exceptionTest()
+    {
+        try
+        {
+            GetoptArg[] gArgs = new GetoptArg[] { // getoptArgs
+                new GetoptArg("wf", "wrong-flag", "", FlagType.ArgumentOptional)
+            };
+            string[] args = { "" };
+
+            GetoptLike getopt = new GetoptLike(args, gArgs);
+        }
+        catch (GetoptException e)
+        {
+            Console.WriteLine(e.Message);
+            Assert.True(true);
+            return;
+        }
+
+        Assert.Fail();
+    }
+
     private void failMainTestWithLog(string shortFlags, GetoptArg[] getoptArgs, string[] args,
             GetoptLikeTestAnswer[] answers, string[] otherStrings, GetoptLike getopt)
     {
