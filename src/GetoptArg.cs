@@ -9,6 +9,9 @@ public enum FlagType
 
 public class GetoptArg
 {
+    /// <summary>
+    /// shortFlag must be at most one character long, or empty string
+    /// </summary>
     public string shortFlag { get; }
     public string longFlag { get; }
     public FlagType flagType { get; }
