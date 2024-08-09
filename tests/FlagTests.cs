@@ -200,6 +200,17 @@ public class FlagTests
                 },
                 new string[] {}, // Other strings
             },
+            new object[] {
+                "", // shortFlags
+                new GetoptArg[] { // getoptArgs
+                    new GetoptArg("l", "long-long", "", FlagType.NoArgument),
+                },
+                new string[] {"--long-long"}, // args
+                new GetoptLikeTestAnswer[] { // answers
+                    new GetoptLikeTestAnswer("",  "long-long", ""),
+                },
+                new string[] {}, // Other strings
+            },
 
             // Other string tests
             new object[] {
