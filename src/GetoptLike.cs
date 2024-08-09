@@ -7,9 +7,9 @@ public class GetoptLike
     internal const char FLAG_SYMBOL = '-';
     private const string SHORT_OPS_ARG_SYMBOL = ":";
     private const string SHORT_OPS_REGEX_PATTERN =
-        $"'^\\(\\([a-zA-Z]\\)\\"
-        + $"|\\([a-zA-Z]{SHORT_OPS_ARG_SYMBOL}\\)\\"
-        + $"|\\([a-zA-Z]{SHORT_OPS_ARG_SYMBOL}{SHORT_OPS_ARG_SYMBOL}\\)\\)*$'";
+        $"^(([a-zA-Z])"
+        + $"|([a-zA-Z]{SHORT_OPS_ARG_SYMBOL})"
+        + $"|([a-zA-Z]{SHORT_OPS_ARG_SYMBOL}{SHORT_OPS_ARG_SYMBOL}))*$";
 
     /// <summary>
     /// shortOps, short option
@@ -51,6 +51,10 @@ public class GetoptLike
 
     private void processShortOps()
     {
+        if (!checkShortOps()) {
+            throw new GetoptException("ShortOps have a wrong formatting.");
+        }
+
         if (string.IsNullOrEmpty(shortOps)) return;
 
         // Fill argsDictionary with all flags from shortOps
@@ -68,6 +72,10 @@ public class GetoptLike
 
     private void processLongOps()
     {
+        if (!checkLongOps()) {
+            throw new GetoptException("longOps have a wrong formatting.");
+        }
+
         // Fill argsDictionary with all flags from shortOps
         foreach (GetoptArg gArg in longOps)
         {
@@ -192,7 +200,8 @@ public class GetoptLike
             if (!string.IsNullOrEmpty(gArg.shortFlag))
                 shortOpsToCheck += gArg.shortFlag;
 
-            if (gArg.shortFlag.Length != 1)
+            if (gArg.shortFlag.Length != 1
+                    && gArg.shortFlag.Length != 0)
             {
                 throw new GetoptException("Wrong format of longOps, shortFlag defined in longOps must be one character long");
             }
