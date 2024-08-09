@@ -88,6 +88,9 @@ internal class GetoptLikeStateMachine
         }
     }
 
+    /// <summary>
+    /// Start state of state machine.
+    /// </summary>
     private void start()
     {
         // Reset last flags
@@ -111,6 +114,10 @@ internal class GetoptLikeStateMachine
         updateOtherString();
     }
 
+    /// <summary>
+    /// State that processes unwanted text,
+    /// that cannot be flag, or argument
+    /// </summary>
     private void otherStringState()
     {
         // Reset a lastShortFlag
@@ -127,6 +134,9 @@ internal class GetoptLikeStateMachine
         updateOtherString();
     }
 
+    /// <summary>
+    /// State that processes start of the flag ('-')
+    /// </summary>
     private void flagStart()
     {
         // Reset a lastShortFlag
@@ -150,6 +160,9 @@ internal class GetoptLikeStateMachine
         currState = State.FLAG_STATE;
     }
 
+    /// <summary>
+    /// State that processes the flag input
+    /// </summary>
     private void flag()
     {
         // If we get a space, we move to argState or start state,
@@ -190,6 +203,9 @@ internal class GetoptLikeStateMachine
         // Other wise no action required as we're staying the same state
     }
 
+    /// <summary>
+    /// State that processes start of the long flag input
+    /// </summary>
     private void longFlagStart()
     {
         if (isSpace)
@@ -206,6 +222,9 @@ internal class GetoptLikeStateMachine
         resetOtherString();
     }
 
+    /// <summary>
+    /// State that processes long flag input
+    /// </summary>
     private void longFlag()
     {
         GetoptArg? gArg;
@@ -242,6 +261,9 @@ internal class GetoptLikeStateMachine
         updateLastLongFlag();
     }
 
+    /// <summary>
+    /// State that processes input between flag/long_flag and argument state
+    /// </summary>
     private void betweenFlagAndArg()
     {
         if (isSpace) { return; }
@@ -273,6 +295,9 @@ internal class GetoptLikeStateMachine
         currState = State.OTHER_STRING_STATE;
     }
 
+    /// <summary>
+    /// State that processes argument's input
+    /// </summary>
     private void argState()
     {
         if (isSpace)
@@ -287,6 +312,9 @@ internal class GetoptLikeStateMachine
         updateFlagArg();
     }
 
+    /// <summary>
+    /// End state, this state is activated when there is no input left
+    /// </summary>
     private void end()
     {
         if (!this.flagsArg.Equals(""))
@@ -300,6 +328,9 @@ internal class GetoptLikeStateMachine
         saveOtherString();
     }
 
+    /// <summary>
+    /// Updates lastShortFlag, adds lastShortFlag to argList if appropriate
+    /// </summary>
     private void updateLastShortFlag()
     {
         lastShortFlag = arg[index];
@@ -317,6 +348,9 @@ internal class GetoptLikeStateMachine
         }
     }
 
+    /// <summary>
+    /// Updates lastLongFlag
+    /// </summary>
     private void updateLastLongFlag()
     {
         this.lastLongFlag += arg[index];
@@ -324,11 +358,17 @@ internal class GetoptLikeStateMachine
         this.lastShortFlag = INVALID_SHORT_FLAG;
     }
 
+    /// <summary>
+    /// Updates flagsArg
+    /// </summary>
     private void updateFlagArg()
     {
         this.flagsArg += this.arg[index];
     }
 
+    /// <summary>
+    /// Saves argument into argList, if we have appropriate lastShortFlag/lastLongFlag
+    /// </summary>
     private void saveArg()
     {
         GetoptArg? gDicArg;
@@ -344,6 +384,9 @@ internal class GetoptLikeStateMachine
         this.flagsArg = "";
     }
 
+    /// <summary>
+    /// Saves lastLongFlag into argList, if appropriate
+    /// </summary>
     private void saveLastLongFlag()
     {
         GetoptArg? gArg;
@@ -355,6 +398,10 @@ internal class GetoptLikeStateMachine
         }
     }
 
+    /// <summary>
+    /// Update arg that points to args variable,
+    /// can trigger isSpace to go to the true value
+    /// </summary>
     private void updateArg()
     {
         this.isSpace = false;
@@ -373,6 +420,13 @@ internal class GetoptLikeStateMachine
         }
     }
 
+    /// <summary>
+    /// Return the next arg from args,
+    /// and increase the argsIndex
+    /// </summary>
+    /// <returns>
+    /// Return the next arg from args
+    /// </returns>
     private string nextArg()
     {
         argsIndex++;
@@ -385,16 +439,25 @@ internal class GetoptLikeStateMachine
         return args.ElementAt(argsIndex);
     }
 
+    /// <summary>
+    /// Update otherString with currently processed character
+    /// </summary>
     private void updateOtherString()
     {
         this.otherString += arg[index];
     }
 
+    /// <summary>
+    /// Reset otherString, sets to empty string
+    /// </summary>
     private void resetOtherString()
     {
         this.otherString = "";
     }
 
+    /// <summary>
+    /// Save otherString into otherArgs
+    /// </summary>
     private void saveOtherString()
     {
         if (!string.IsNullOrEmpty(this.otherString))

@@ -49,6 +49,9 @@ public class GetoptLike
         processLongOps();
     }
 
+    /// <summary>
+    /// Processes shortOps and args into argList and otherArgs.
+    /// </summary>
     private void processShortOps()
     {
         if (!checkShortOps()) {
@@ -70,6 +73,9 @@ public class GetoptLike
         otherArgs = machine.otherArgs;
     }
 
+    /// <summary>
+    /// Processes longOps and args into argList and otherArgs.
+    /// </summary>
     private void processLongOps()
     {
         if (!checkLongOps()) {
