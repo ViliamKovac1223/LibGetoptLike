@@ -258,7 +258,7 @@ public class FlagTests
 
     [Theory]
     [MemberData(nameof(dataForShortFlagTests))]
-    public void LongFlagTests(string shortFlags, GetoptArg[] getoptArgs, string[] args,
+    public void mainTest(string shortFlags, GetoptArg[] getoptArgs, string[] args,
             GetoptLikeTestAnswer[] answers, string[] otherStrings)
     {
         GetoptLike getopt;
@@ -277,7 +277,7 @@ public class FlagTests
         }
 
         if (answers.Count() != getopt.gArgs.Count())
-            Assert.Fail();
+            failMainTestWithLog(shortFlags, getoptArgs, args, answers, otherStrings, getopt);
 
         for (int i = 0; i < getopt.gArgs.Count(); i++)
         {
@@ -292,7 +292,7 @@ public class FlagTests
             if (!rightShortFlag.Equals(testedShortFlag)
                     && rightLongFlag.Equals(rightShortFlag))
             {
-                Assert.Fail();
+                failMainTestWithLog(shortFlags, getoptArgs, args, answers, otherStrings, getopt);
                 return;
             }
 
@@ -300,7 +300,7 @@ public class FlagTests
             // is null and the other isn't, fail the test
             if (string.IsNullOrEmpty(rightAnswer) != string.IsNullOrEmpty(testedAnswer))
             {
-                Assert.Fail();
+                failMainTestWithLog(shortFlags, getoptArgs, args, answers, otherStrings, getopt);
                 return;
             }
 
@@ -309,22 +309,74 @@ public class FlagTests
             // If the different answer is caught, fail the test
             if (!rightAnswer.Equals(testedAnswer))
             {
-                Assert.Fail();
+                failMainTestWithLog(shortFlags, getoptArgs, args, answers, otherStrings, getopt);
                 return;
             }
         }
 
         // If the otherString is different than expected fail the test
         if (getopt.otherArgs.Count() != otherStrings.Count())
-            Assert.Fail();
+            failMainTestWithLog(shortFlags, getoptArgs, args, answers, otherStrings, getopt);
 
         for (int i = 0; i < otherStrings.Count(); i++)
         {
             if (!otherStrings.ElementAt(i).Equals(getopt.otherArgs.ElementAt(i)))
-                Assert.Fail();
+                failMainTestWithLog(shortFlags, getoptArgs, args, answers, otherStrings, getopt);
         }
 
         // If everything passed, then the test is successful
         Assert.True(true);
+    }
+
+    private void failMainTestWithLog(string shortFlags, GetoptArg[] getoptArgs, string[] args,
+            GetoptLikeTestAnswer[] answers, string[] otherStrings, GetoptLike getopt)
+    {
+        Console.WriteLine("shortFlags: " + shortFlags);
+
+        Console.WriteLine("getoptArgs: ");
+        foreach (GetoptArg gArg in getoptArgs)
+            printGetoptArg(gArg);
+
+        Console.WriteLine("args: ");
+        foreach (string arg in args)
+            Console.WriteLine($"\t{arg}");
+
+        Console.WriteLine("answers: ");
+        foreach (GetoptLikeTestAnswer answer in answers)
+            printGetoptLikeTestAnswer(answer);
+
+        Console.WriteLine("otherStrings: ");
+        foreach (string otherString in otherStrings)
+            Console.WriteLine($"\t{otherString}");
+
+        Console.WriteLine("getopt: ");
+        Console.WriteLine("\tgArgs: ");
+        foreach (GetoptArg gArg in getopt.gArgs)
+            printGetoptArg(gArg);
+
+        Console.WriteLine("\totherArg: ");
+        foreach (string otherArg in getopt.otherArgs)
+            Console.WriteLine($"\t\t{otherArg}");
+
+        Assert.Fail();
+    }
+
+    private void printGetoptArg(GetoptArg gArg)
+    {
+        Console.Write($"\tgetopt:\n" +
+                $"\t\tshortFlag: {gArg.shortFlag}\n" +
+                $"\t\tlongFlag: {gArg.longFlag}\n" +
+                $"\t\tflagType: {gArg.flagType}\n" +
+                $"\t\targument: {gArg.argument}\n"
+                );
+    }
+
+    private void printGetoptLikeTestAnswer(GetoptLikeTestAnswer answer)
+    {
+        Console.Write($"\tAnswer:\n" +
+                $"\t\tshortFlag: {answer.shortFlag}\n" +
+                $"\t\tlongFlag: {answer.longFlag}\n" +
+                $"\t\tanswer: {answer.answer}\n"
+                );
     }
 }
