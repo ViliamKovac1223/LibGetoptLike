@@ -24,6 +24,7 @@ public class GetoptLike
 
     public Dictionary<string, GetoptArg> argsDictionary { get; private set; }
     public List<GetoptArg> gArgs { get; private set; }
+    public List<string> otherArgs { get; private set; }
 
     private GetoptLike(string[] args)
     {
@@ -31,6 +32,7 @@ public class GetoptLike
         this.argsDictionary = new Dictionary<string, GetoptArg>();
         this.longOps = new GetoptArg[1];
         this.gArgs = new List<GetoptArg>();
+        this.otherArgs = new List<string>();
     }
 
     public GetoptLike(string[] args, string shortOps)
@@ -61,9 +63,11 @@ public class GetoptLike
 
         GetoptLikeStateMachine machine = new GetoptLikeStateMachine(args, argsDictionary);
         gArgs = machine.argList;
+        otherArgs = machine.otherArgs;
     }
 
-    private void processLongOps() {
+    private void processLongOps()
+    {
         // Fill argsDictionary with all flags from shortOps
         foreach (GetoptArg gArg in longOps)
         {
@@ -84,6 +88,7 @@ public class GetoptLike
 
         GetoptLikeStateMachine machine = new GetoptLikeStateMachine(args, argsDictionary);
         gArgs = machine.argList;
+        otherArgs = machine.otherArgs;
     }
 
     /// <summary>

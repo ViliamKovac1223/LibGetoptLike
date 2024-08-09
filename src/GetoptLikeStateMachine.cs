@@ -6,7 +6,7 @@ internal class GetoptLikeStateMachine
     private enum State
     {
         START_STATE,
-        NO_FLAG_NOR_ARGUMENT_STATE,
+        OTHER_STRING_STATE,
         FLAG_START_STATE,
         FLAG_STATE,
         LONG_FLAG_START_STATE,
@@ -26,6 +26,7 @@ internal class GetoptLikeStateMachine
 
     private char lastShortFlag;
     private string lastLongFlag;
+    private string otherString;
     private const char INVALID_SHORT_FLAG = ' ';
     private const char LONG_FLAG_OPTIONAL_ARG_START = '=';
 
@@ -33,6 +34,7 @@ internal class GetoptLikeStateMachine
     private delegate void stateDelegate();
     private Dictionary<State, stateDelegate> states;
     private State currState;
+    public List<string> otherArgs { get; }
     public List<GetoptArg> argList { get; }
 
     public GetoptLikeStateMachine(string[] args, Dictionary<string, GetoptArg> argsDictionary)
@@ -43,6 +45,7 @@ internal class GetoptLikeStateMachine
         this.index = -1; // It will be set to a 0 as soon as updateArg is called
         this.lastShortFlag = INVALID_SHORT_FLAG;
         this.lastLongFlag = "";
+        this.otherString = "";
         // If state machine ends and this is set to true 
         // it indicates that error happened during processing
 
@@ -51,12 +54,13 @@ internal class GetoptLikeStateMachine
         this.flagsArg = "";
 
         this.argList = new List<GetoptArg>();
+        this.otherArgs = new List<string>();
         this.argsDictionary = argsDictionary;
 
         // Init states dictionary with all possible states
         this.states = new Dictionary<State, stateDelegate>();
         this.states.Add(State.START_STATE, start);
-        this.states.Add(State.NO_FLAG_NOR_ARGUMENT_STATE, noFlagNorArgument);
+        this.states.Add(State.OTHER_STRING_STATE, otherStringState);
         this.states.Add(State.FLAG_START_STATE, flagStart);
         this.states.Add(State.FLAG_STATE, flag);
         this.states.Add(State.LONG_FLAG_START_STATE, longFlagStart);
@@ -68,7 +72,7 @@ internal class GetoptLikeStateMachine
         currState = State.START_STATE;
 
         // If there are no arguments to be parsed don't start parsing
-        if (this.args.Length == 0) return ;
+        if (this.args.Length == 0) return;
 
         this.arg = args.ElementAt(argsIndex);
         // Run the state machine
@@ -92,18 +96,22 @@ internal class GetoptLikeStateMachine
 
         // If we get a space in start state, we just stay in this state
         if (isSpace) { return; }
+
         // If we get a flag symbl ('-') we move the FLAG_START_STATE
         else if (this.arg[index] == GetoptLike.FLAG_SYMBOL)
         {
             currState = State.FLAG_START_STATE;
+            updateOtherString();
             return;
         }
+
         // If we get a string in start state, 
         // we move into a state where we don't take a argument, neither we take a flag
-        currState = State.NO_FLAG_NOR_ARGUMENT_STATE;
+        currState = State.OTHER_STRING_STATE;
+        updateOtherString();
     }
 
-    private void noFlagNorArgument()
+    private void otherStringState()
     {
         // Reset a lastShortFlag
         lastShortFlag = INVALID_SHORT_FLAG;
@@ -112,12 +120,11 @@ internal class GetoptLikeStateMachine
         if (isSpace)
         {
             currState = State.START_STATE;
+            saveOtherString();
             return;
         }
-        // If we get a flag symbl ('-'), we stay in this state
-        else if (this.arg[index] == GetoptLike.FLAG_SYMBOL) { return; }
-
         // If we get a string, we stay in this state (no action required)
+        updateOtherString();
     }
 
     private void flagStart()
@@ -128,15 +135,18 @@ internal class GetoptLikeStateMachine
         if (isSpace)
         {
             currState = State.START_STATE;
+            saveOtherString();
             return;
         }
         else if (this.arg[index] == GetoptLike.FLAG_SYMBOL)
         {
+            updateOtherString();
             currState = State.LONG_FLAG_START_STATE;
             return;
         }
         // If we get a string, we go to flag state
         updateLastShortFlag();
+        resetOtherString();
         currState = State.FLAG_STATE;
     }
 
@@ -186,12 +196,14 @@ internal class GetoptLikeStateMachine
         {
             currState = State.START_STATE;
             lastLongFlag = "";
+            saveOtherString();
             return;
         }
 
         // If we get any string other than space, we go to the long flag state
         currState = State.LONG_FLAG_SATE;
         updateLastLongFlag();
+        resetOtherString();
     }
 
     private void longFlag()
@@ -207,12 +219,12 @@ internal class GetoptLikeStateMachine
                     && gArg.flagType == FlagType.ArgumentRequired)
             {
                 currState = State.ARG_STATE;
-                return ;
+                return;
             }
 
             currState = State.START_STATE;
             saveLastLongFlag();
-            return ;
+            return;
         }
         // If we got character that indicates start of the optional argument,
         // and the long flag has required/optional argument
@@ -223,7 +235,7 @@ internal class GetoptLikeStateMachine
                     || gArg.flagType == FlagType.ArgumentOptional))
         {
             currState = State.ARG_STATE;
-            return ;
+            return;
         }
 
         // If we got any other string we stay in the long flag state
@@ -258,7 +270,7 @@ internal class GetoptLikeStateMachine
         }
 
         // If we get string, and last flag didn't have required argument
-        currState = State.NO_FLAG_NOR_ARGUMENT_STATE;
+        currState = State.OTHER_STRING_STATE;
     }
 
     private void argState()
@@ -280,9 +292,12 @@ internal class GetoptLikeStateMachine
         if (!this.flagsArg.Equals(""))
         {
             saveArg();
-        } else if (!this.lastLongFlag.Equals("")) {
+        }
+        else if (!this.lastLongFlag.Equals(""))
+        {
             saveLastLongFlag();
         }
+        saveOtherString();
     }
 
     private void updateLastShortFlag()
@@ -329,7 +344,8 @@ internal class GetoptLikeStateMachine
         this.flagsArg = "";
     }
 
-    private void saveLastLongFlag() {
+    private void saveLastLongFlag()
+    {
         GetoptArg? gArg;
         // Save flag if it is a valid flag
         if (this.argsDictionary.TryGetValue(this.lastLongFlag, out gArg))
@@ -367,5 +383,23 @@ internal class GetoptLikeStateMachine
         }
 
         return args.ElementAt(argsIndex);
+    }
+
+    private void updateOtherString()
+    {
+        this.otherString += arg[index];
+    }
+
+    private void resetOtherString()
+    {
+        this.otherString = "";
+    }
+
+    private void saveOtherString()
+    {
+        if (!string.IsNullOrEmpty(this.otherString))
+            this.otherArgs.Add(this.otherString);
+
+        resetOtherString();
     }
 }
