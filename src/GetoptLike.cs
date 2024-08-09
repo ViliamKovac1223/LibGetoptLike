@@ -106,7 +106,7 @@ public class GetoptLike
                 || !(indexForShortOps < shortOps.Length)
                 || shortOps.ElementAt(indexForShortOps) == SHORT_OPS_ARG_SYMBOL.ElementAt(0))
         {
-            // TODO: throw exception
+            throw new GetoptException("Couldn't get new getopt argument because either shortOps is null or its format is wrong");
         }
 
         string flagKey = shortOps.ElementAt(indexForShortOps).ToString();
@@ -194,7 +194,7 @@ public class GetoptLike
 
             if (gArg.shortFlag.Length != 1)
             {
-                // TODO: throw exception
+                throw new GetoptException("Wrong format of longOps, shortFlag defined in longOps must be one character long");
             }
         }
 
