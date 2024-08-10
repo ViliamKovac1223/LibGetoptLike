@@ -1,6 +1,14 @@
 bin/
 bin/
+
+src/bin/
 src/obj/
-src/obj/
+
 tests/bin/
 tests/obj/
+
+shortFlagsExample/bin/
+shortFlagsExample/obj/
+
+longFlagsExample/bin/
+longFlagsExample/obj/
