@@ -17,7 +17,8 @@ public class GetoptArg
     public FlagType flagType { get; }
     public string? argument { get; }
 
-    public GetoptArg(string shortFlag, FlagType flagType) {
+    public GetoptArg(string shortFlag, FlagType flagType)
+    {
         this.shortFlag = shortFlag;
         this.flagType = flagType;
         this.longFlag = "";
@@ -35,3 +36,4 @@ public class GetoptArg
         this.argument = argument;
     }
 }
+

@@ -54,7 +54,8 @@ public class GetoptLike
     /// </summary>
     private void processShortOps()
     {
-        if (!checkShortOps()) {
+        if (!checkShortOps())
+        {
             throw new GetoptException("ShortOps have a wrong formatting.");
         }
 
@@ -78,7 +79,8 @@ public class GetoptLike
     /// </summary>
     private void processLongOps()
     {
-        if (!checkLongOps()) {
+        if (!checkLongOps())
+        {
             throw new GetoptException("longOps have a wrong formatting.");
         }
 
